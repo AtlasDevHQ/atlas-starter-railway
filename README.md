@@ -2,7 +2,7 @@
 
 A text-to-SQL data analyst agent powered by [Atlas](https://useatlas.dev).
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/atlas?referralCode=atlas)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/from-repo?repo=AtlasDevHQ%2Fatlas-starter-railway)
 
 This project is configured for **PostgreSQL**. Ask natural-language questions, and the agent explores a semantic layer, writes validated SQL, and returns interpreted results.
 
