@@ -29,6 +29,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { parseSuggestions } from "../lib/helpers";
+import { ErrorBoundary } from "./error-boundary";
 
 const API_KEY_STORAGE_KEY = "atlas-api-key";
 
@@ -353,7 +354,7 @@ export function AtlasChat() {
           />
         )}
 
-        <main className="flex flex-1 flex-col overflow-hidden">
+        <main id="main" className="flex flex-1 flex-col overflow-hidden">
           <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-hidden p-4">
             <header className="mb-4 flex-none border-b border-zinc-100 pb-3 dark:border-zinc-800">
               <div className="flex items-center justify-between">
@@ -424,6 +425,14 @@ export function AtlasChat() {
                 )}
 
                 <ScrollArea viewportRef={scrollRef} className="min-h-0 flex-1">
+                <ErrorBoundary
+                  fallbackRender={(_error, reset) => (
+                    <div className="flex flex-col items-center justify-center gap-2 p-6 text-sm text-red-600 dark:text-red-400">
+                      <p>Failed to render messages.</p>
+                      <button onClick={reset} className="text-xs underline">Try again</button>
+                    </div>
+                  )}
+                >
                 <div className="space-y-4 pb-4 pr-3">
                   {messages.length === 0 && !error && (
                     <div className="flex h-full flex-col items-center justify-center gap-6">
@@ -452,7 +461,7 @@ export function AtlasChat() {
                   {messages.map((m, msgIndex) => {
                     if (m.role === "user") {
                       return (
-                        <div key={m.id} className="flex justify-end">
+                        <div key={m.id} className="flex justify-end" role="article" aria-label={`Message from you${m.createdAt ? ` at ${new Date(m.createdAt).toLocaleTimeString()}` : ""}`}>
                           <div className="max-w-[85%] rounded-xl bg-blue-600 px-4 py-3 text-sm text-white">
                             {m.parts?.map((part, i) =>
                               part.type === "text" ? (
@@ -479,7 +488,7 @@ export function AtlasChat() {
                       : [];
 
                     return (
-                      <div key={m.id} className="space-y-2">
+                      <div key={m.id} className="space-y-2" role="article" aria-label={`Message from Atlas${m.createdAt ? ` at ${new Date(m.createdAt).toLocaleTimeString()}` : ""}`}>
                         {m.parts?.map((part, i) => {
                           if (part.type === "text" && part.text.trim()) {
                             const displayText = parseSuggestions(part.text).text;
@@ -531,6 +540,7 @@ export function AtlasChat() {
 
                   {isLoading && messages.length > 0 && <TypingIndicator />}
                 </div>
+                </ErrorBoundary>
                 </ScrollArea>
 
                 {error && (
@@ -559,7 +569,9 @@ export function AtlasChat() {
                   }}
                   className="flex flex-none gap-2 border-t border-zinc-100 pt-4 dark:border-zinc-800"
                 >
+                  <label htmlFor="atlas-chat-input" className="sr-only">Chat message</label>
                   <input
+                    id="atlas-chat-input"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Ask a question about your data..."
@@ -568,11 +580,14 @@ export function AtlasChat() {
                   />
                   <button
                     type="submit"
-                    disabled={isLoading || !input.trim()}
-                    className="shrink-0 rounded-lg bg-blue-600 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-500 disabled:opacity-40"
+                    disabled={isLoading}
+                    aria-disabled={!isLoading && !input.trim() ? true : undefined}
+                    aria-describedby={!input.trim() ? "atlas-chat-submit-hint" : undefined}
+                    className="shrink-0 rounded-lg bg-blue-600 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-500 disabled:opacity-40 aria-disabled:opacity-40"
                   >
                     Ask
                   </button>
+                  <span id="atlas-chat-submit-hint" className="sr-only">Type a message to enable sending</span>
                 </form>
               </ActionAuthProvider>
             )}

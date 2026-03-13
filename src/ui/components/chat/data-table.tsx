@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ComponentProps } from "react";
 import { formatCell } from "../../lib/helpers";
+import { ErrorBoundary } from "../error-boundary";
 
-export function DataTable({
+function DataTableInner({
   columns,
   rows,
   maxRows = 10,
@@ -14,6 +15,19 @@ export function DataTable({
 }) {
   const [sortCol, setSortCol] = useState<number | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+
+  if (rows.length === 0) {
+    return (
+      <div className="rounded-lg border border-zinc-200 px-4 py-8 text-center dark:border-zinc-700">
+        <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+          Query returned no results
+        </p>
+        <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+          Try adjusting your query filters or criteria
+        </p>
+      </div>
+    );
+  }
 
   const hasMore = rows.length > maxRows;
 
@@ -100,5 +114,20 @@ export function DataTable({
         </div>
       )}
     </div>
+  );
+}
+
+export function DataTable(props: ComponentProps<typeof DataTableInner>) {
+  return (
+    <ErrorBoundary
+      fallbackRender={(_error, reset) => (
+        <div className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-400">
+          <span>Unable to render results.</span>
+          <button onClick={reset} className="underline">Retry</button>
+        </div>
+      )}
+    >
+      <DataTableInner {...props} />
+    </ErrorBoundary>
   );
 }
