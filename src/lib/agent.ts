@@ -2,8 +2,9 @@
  * The Atlas agent.
  *
  * Runs a single-agent loop driven by a ToolRegistry (default: explore,
- * executeSQL). The loop runs until the step limit (25) is reached or
- * the model stops issuing tool calls.
+ * executeSQL). The loop runs until the step limit is reached (configurable
+ * via `ATLAS_AGENT_MAX_STEPS`, default 25) or the model stops issuing
+ * tool calls.
  */
 
 import {
@@ -12,6 +13,7 @@ import {
   streamText,
   type ModelMessage,
   type SystemModelMessage,
+  type ToolSet,
   type UIMessage,
 } from "ai";
 import { getModel, getProviderType, type ProviderType } from "./providers";
@@ -21,7 +23,10 @@ import { connections, detectDBType, type ConnectionMetadata, type DBType } from 
 import { getCrossSourceJoins, type CrossSourceJoin } from "./semantic";
 import { getSemanticIndex } from "./semantic-index";
 import { createLogger, getRequestContext } from "./logger";
+import { getSetting } from "./settings";
 import { hasInternalDB, internalExecute } from "./db/internal";
+import { dispatchMutableHook } from "./plugins/hooks";
+import { plugins } from "./plugins/registry";
 import {
   trace,
   SpanStatusCode,
@@ -30,6 +35,26 @@ import {
 
 const log = createLogger("agent");
 const tracer = trace.getTracer("atlas");
+
+const DEFAULT_MAX_STEPS = 25;
+const MIN_MAX_STEPS = 1;
+const MAX_MAX_STEPS = 100;
+
+let lastWarnedMaxSteps: string | undefined;
+
+/** Read agent max steps from settings cache (DB override > env var > default). */
+function getAgentMaxSteps(): number {
+  const raw = getSetting("ATLAS_AGENT_MAX_STEPS") ?? String(DEFAULT_MAX_STEPS);
+  const n = parseInt(raw, 10);
+  if (!Number.isFinite(n) || n < MIN_MAX_STEPS || n > MAX_MAX_STEPS) {
+    if (raw !== lastWarnedMaxSteps) {
+      log.warn({ value: raw }, `Invalid ATLAS_AGENT_MAX_STEPS value; using default ${DEFAULT_MAX_STEPS}`);
+      lastWarnedMaxSteps = raw;
+    }
+    return DEFAULT_MAX_STEPS;
+  }
+  return n;
+}
 
 const SYSTEM_PROMPT_PREFIX = `You are Atlas, an expert data analyst AI. You answer questions about data by exploring a semantic layer, writing SQL, and interpreting results.
 
@@ -336,12 +361,95 @@ export function applyCacheControl(
 }
 
 /**
+ * Wrap each tool's execute function with beforeToolCall / afterToolCall
+ * plugin hook dispatch. No-op when no plugins are registered.
+ *
+ * Execution order for tools that have domain-specific hooks (e.g. executeSQL):
+ *   beforeToolCall → beforeQuery → execute → afterQuery → afterToolCall
+ *
+ * - beforeToolCall: can return `{ args }` to modify args, or throw to reject
+ * - afterToolCall: can return `{ result }` to modify the result, or throw to reject
+ */
+function wrapToolsWithHooks(
+  toolSet: ToolSet,
+  hookCtx: { userId?: string; conversationId?: string },
+): ToolSet {
+  // Optimization: skip wrapping when no plugins are registered at request time.
+  // Plugins are initialized at boot before any requests — this is safe.
+  if (plugins.size === 0) return toolSet;
+
+  const callCounter = { value: 0 };
+  const wrapped: ToolSet = {};
+
+  for (const [name, t] of Object.entries(toolSet)) {
+    if (!t.execute) {
+      wrapped[name] = t;
+      continue;
+    }
+
+    const origExecute = t.execute;
+    wrapped[name] = {
+      ...t,
+      execute: async (
+        args: Record<string, unknown>,
+        options: Parameters<NonNullable<typeof t.execute>>[1],
+      ) => {
+        callCounter.value++;
+        const ctx = {
+          toolName: name,
+          args,
+          context: { ...hookCtx, toolCallCount: callCounter.value },
+        };
+
+        // beforeToolCall — can modify args or throw to reject
+        let finalArgs: Record<string, unknown>;
+        try {
+          finalArgs = await dispatchMutableHook(
+            "beforeToolCall",
+            ctx,
+            "args",
+          ) as Record<string, unknown>;
+        } catch (err) {
+          log.warn(
+            { toolName: name, err: err instanceof Error ? err : new Error(String(err)) },
+            "Tool call rejected by plugin",
+          );
+          return `Tool call rejected by plugin: ${err instanceof Error ? err.message : String(err)}`;
+        }
+
+        const start = Date.now();
+        const result = await origExecute(finalArgs, options);
+        const durationMs = Date.now() - start;
+
+        // afterToolCall — can modify result or throw to reject
+        try {
+          return await dispatchMutableHook(
+            "afterToolCall",
+            { ...ctx, args: finalArgs, result, durationMs, context: { ...hookCtx, toolCallCount: callCounter.value } },
+            "result",
+          );
+        } catch (err) {
+          log.error(
+            { toolName: name, err: err instanceof Error ? err : new Error(String(err)) },
+            "Tool result rejected by plugin",
+          );
+          return `Tool result rejected by plugin: ${err instanceof Error ? err.message : String(err)}`;
+        }
+      },
+    };
+  }
+
+  return wrapped;
+}
+
+/**
  * Run the Atlas agent loop.
  *
  * @param messages - The conversation history from the chat UI.
  * @param tools - Optional custom {@link ToolRegistry}. Defaults to
  *   {@link defaultRegistry} (explore + executeSQL). The loop terminates
- *   when the step limit (25) is reached or the model stops issuing tool calls.
+ *   when the step limit is reached (configurable via `ATLAS_AGENT_MAX_STEPS`,
+ *   default 25) or the model stops issuing tool calls.
  * @param conversationId - Optional conversation ID for token usage tracking.
  *   When provided, the recorded token usage row links to this conversation.
  */
@@ -383,6 +491,8 @@ export async function runAgent({
 
   // Resolve async work before entering otelContext.with() (sync callback).
   const modelMessages = await convertToModelMessages(messages);
+  const rawTools = toolRegistry.getAll();
+  const tools = wrapToolsWithHooks(rawTools, { userId: userId ?? undefined, conversationId });
 
   let result;
   try {
@@ -390,10 +500,10 @@ export async function runAgent({
       model,
       system: buildSystemParam(providerType, toolRegistry, warnings),
       messages: modelMessages,
-      tools: toolRegistry.getAll(),
+      tools,
       temperature: 0.2,
       maxOutputTokens: 4096,
-      stopWhen: stepCountIs(25),
+      stopWhen: stepCountIs(getAgentMaxSteps()),
       // totalMs: 180s for self-hosted (full agent loop budget).
       // On Vercel, maxDuration caps the serverless function at 300s (Pro plan).
       timeout: { totalMs: 180_000, stepMs: 30_000, chunkMs: 5_000 },
