@@ -49,7 +49,11 @@ export async function adminAuthPreamble(req: Request, requestId: string) {
   if (!authResult.authenticated) {
     log.warn({ requestId, status: authResult.status }, "Authentication failed");
     const code = authErrorCode(authResult.error);
-    return { error: { error: code, message: authResult.error, requestId }, status: authResult.status as 401 | 403 | 500 };
+    const errorBody: Record<string, unknown> = { error: code, message: authResult.error, requestId };
+    if (authResult.ssoRedirectUrl) {
+      errorBody.ssoRedirectUrl = authResult.ssoRedirectUrl;
+    }
+    return { error: errorBody, status: authResult.status as 401 | 403 | 500 };
   }
 
   // Enforce admin role — when auth mode is "none" (no auth configured, e.g.
@@ -70,6 +74,27 @@ export async function adminAuthPreamble(req: Request, requestId: string) {
       status: 429 as const,
       headers: { "Retry-After": String(retryAfterSeconds) },
     };
+  }
+
+  // IP allowlist check — enterprise feature, after auth so we have org context
+  const orgId = authResult.user?.activeOrganizationId;
+  if (orgId) {
+    let checkIPAllowlist: ((orgId: string, clientIP: string | null) => Promise<{ allowed: boolean }>) | undefined;
+    try {
+      ({ checkIPAllowlist } = await import("../../../../../ee/src/auth/ip-allowlist"));
+    } catch {
+      // ee module not installed — IP allowlist feature unavailable, skip
+    }
+    if (checkIPAllowlist) {
+      const ipCheck = await checkIPAllowlist(orgId, ip);
+      if (!ipCheck.allowed) {
+        log.warn({ requestId, orgId, ip }, "IP not in workspace allowlist");
+        return {
+          error: { error: "ip_not_allowed", message: "Your IP address is not in the workspace's allowlist.", requestId },
+          status: 403 as const,
+        };
+      }
+    }
   }
 
   return { authResult };

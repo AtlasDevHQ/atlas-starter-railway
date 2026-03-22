@@ -147,8 +147,12 @@ chat.openapi(chatRoute, async (c) => {
   }
   if (!authResult.authenticated) {
     log.warn({ requestId, status: authResult.status }, "Authentication failed");
+    const errorBody: Record<string, unknown> = { error: "auth_error", message: authResult.error, retryable: false, requestId };
+    if (authResult.ssoRedirectUrl) {
+      errorBody.ssoRedirectUrl = authResult.ssoRedirectUrl;
+    }
     return c.json(
-      { error: "auth_error", message: authResult.error, retryable: false, requestId },
+      errorBody,
       authResult.status as 401 | 403 | 500,
     );
   }
@@ -175,6 +179,27 @@ chat.openapi(chatRoute, async (c) => {
       },
       { status: 429, headers: { "Retry-After": String(retryAfterSeconds) } },
     );
+  }
+
+  // IP allowlist check — enterprise feature, after auth so we have org context
+  let checkIPAllowlist: ((orgId: string, clientIP: string | null) => Promise<{ allowed: boolean }>) | undefined;
+  try {
+    ({ checkIPAllowlist } = await import("../../../../../ee/src/auth/ip-allowlist"));
+  } catch {
+    // ee module not installed — IP allowlist feature unavailable, skip
+  }
+  if (checkIPAllowlist) {
+    const orgId = authResult.user?.activeOrganizationId;
+    if (orgId) {
+      const ipCheck = await checkIPAllowlist(orgId, ip);
+      if (!ipCheck.allowed) {
+        log.warn({ requestId, orgId, ip }, "IP not in workspace allowlist");
+        return c.json(
+          { error: "ip_not_allowed", message: "Your IP address is not in the workspace's allowlist.", retryable: false, requestId },
+          403,
+        );
+      }
+    }
   }
 
   // Workspace status check — block suspended/deleted workspaces
