@@ -10,7 +10,6 @@ import { useAtlasTransport } from "../hooks/use-atlas-transport";
 import { useConversations } from "../hooks/use-conversations";
 import { ErrorBanner } from "./chat/error-banner";
 import { ApiKeyBar } from "./chat/api-key-bar";
-import { ManagedAuthCard } from "./chat/managed-auth-card";
 import { TypingIndicator } from "./chat/typing-indicator";
 import { ToolPart } from "./chat/tool-part";
 import { Markdown } from "./chat/markdown";
@@ -470,7 +469,7 @@ export function AtlasChat() {
             )}
 
             {isManaged && !isSignedIn ? (
-              <ManagedAuthCard />
+              null /* proxy redirects unauthenticated users to /signup */
             ) : (
               <ActionAuthProvider getHeaders={getHeaders} getCredentials={getCredentials}>
                 {authMode === "simple-key" && (
