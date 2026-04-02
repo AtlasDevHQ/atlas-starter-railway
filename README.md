@@ -1,6 +1,6 @@
 # atlas-starter-railway
 
-A text-to-SQL data analyst agent powered by [Atlas](https://useatlas.dev).
+A text-to-SQL data analyst agent powered by [Atlas](https://www.useatlas.dev).
 
 [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/_XHuNP?referralCode=N5vD3S)
 
@@ -94,5 +94,5 @@ See `docs/deploy.md` for the full variable reference.
 
 ## Learn More
 
-- [Atlas Documentation](https://useatlas.dev)
+- [Atlas Documentation](https://www.useatlas.dev)
 - [GitHub](https://github.com/AtlasDevHQ/atlas)
