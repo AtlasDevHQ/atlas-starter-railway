@@ -25,7 +25,7 @@
         "@tanstack/react-query-devtools": "^5.96.2",
         "@tanstack/react-table": "^8.21.3",
         "@useatlas/react": "^0.0.5",
-        "@useatlas/types": "^0.0.6",
+        "@useatlas/types": "^0.0.7",
         "ai": "^6.0.141",
         "better-auth": "^1.5.1",
         "class-variance-authority": "^0.7.1",
@@ -686,7 +686,7 @@
 
     "@useatlas/react": ["@useatlas/react@0.0.5", "", { "dependencies": { "@radix-ui/react-slot": "^1.2.4", "@useatlas/types": "^0.0.3", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "radix-ui": "^1.4.3", "react-markdown": "^10.1.0", "remark-gfm": "^4.0.1", "tailwind-merge": "^3.5.0" }, "peerDependencies": { "@ai-sdk/react": ">=3.0.0", "ai": ">=6.0.0", "exceljs": ">=4.0.0", "lucide-react": ">=0.400.0", "react": ">=18.0.0", "react-dom": ">=18.0.0", "react-syntax-highlighter": ">=15.0.0", "recharts": ">=2.0.0", "tailwindcss": ">=4.0.0" }, "optionalPeers": ["exceljs", "lucide-react", "react-syntax-highlighter", "recharts", "tailwindcss"] }, "sha512-LU36J+Q/54b0cD+GwV9BOpe1xlhSACc4y3kms7XHognqoyIWVQltTaV6RHJaPUrvCbOpn4jWqTQLzqjL/IwLDA=="],
 
-    "@useatlas/types": ["@useatlas/types@0.0.6", "", {}, "sha512-LGF7s4O00KbjUYAH4Nd8b+gEzcmUlwCjss+sCbBoobzAQ8pV9repR/zTwjahwVj0JtwSLIv2yasP18iuvE5VFA=="],
+    "@useatlas/types": ["@useatlas/types@0.0.7", "", {}, "sha512-igm4mUT7/sH3SVhN/li4rSBbHtxJ53MaYdR+0YzkUOiPyyuDP9fAhWtmMbjWo4D3uBiv4epG/TMOJal/UZ5C7g=="],
 
     "@vercel/oidc": ["@vercel/oidc@3.2.0", "", {}, "sha512-UycprH3T6n3jH0k44NHMa7pnFHGu/N05MjojYr+Mc6I7obkoLIJujSWwin1pCvdy/eOxrI/l3uDLQsmcrOb4ug=="],
 
