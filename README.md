@@ -75,6 +75,7 @@ atlas-starter-railway/
 | `bun run atlas -- init` | Generate semantic layer from database |
 | `bun run atlas -- init --demo` | Load simple demo dataset |
 | `bun run atlas -- init --demo cybersec` | Load cybersec demo (62 tables) |
+| `bun run atlas -- init --demo ecommerce` | Load ecommerce demo (52 tables) |
 | `bun run atlas -- diff` | Compare DB schema vs semantic layer |
 | `bun run atlas -- query "question"` | Headless query (table output) |
 | `bun run test` | Run tests |
