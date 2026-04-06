@@ -27,7 +27,7 @@
         "@tanstack/react-query": "^5.96.2",
         "@tanstack/react-query-devtools": "^5.96.2",
         "@tanstack/react-table": "^8.21.3",
-        "@useatlas/react": "^0.0.6",
+        "@useatlas/react": "^0.0.7",
         "@useatlas/types": "^0.0.8",
         "ai": "^6.0.141",
         "better-auth": "^1.5.1",
@@ -709,7 +709,7 @@
 
     "@ungap/structured-clone": ["@ungap/structured-clone@1.3.0", "", {}, "sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g=="],
 
-    "@useatlas/react": ["@useatlas/react@0.0.6", "", { "dependencies": { "@radix-ui/react-slot": "^1.2.4", "@tanstack/react-query": "^5.96.2", "@useatlas/types": "^0.0.8", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "radix-ui": "^1.4.3", "react-markdown": "^10.1.0", "remark-gfm": "^4.0.1", "tailwind-merge": "^3.5.0" }, "peerDependencies": { "@ai-sdk/react": ">=3.0.0", "ai": ">=6.0.0", "exceljs": ">=4.0.0", "lucide-react": ">=0.400.0", "react": ">=18.0.0", "react-dom": ">=18.0.0", "react-syntax-highlighter": ">=15.0.0", "recharts": ">=2.0.0", "tailwindcss": ">=4.0.0" }, "optionalPeers": ["exceljs", "lucide-react", "react-syntax-highlighter", "recharts", "tailwindcss"] }, "sha512-tIK0iGZrGdbPuaJpownkt3NSwt1mTHiZHqAH3IrCzfLpa4vGueNlkhcfsJjDiI6MI1TvbKAXQFN30/bpzEeGOw=="],
+    "@useatlas/react": ["@useatlas/react@0.0.7", "", { "dependencies": { "@radix-ui/react-slot": "^1.2.4", "@tanstack/react-query": "^5.96.2", "@useatlas/types": "^0.0.8", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "radix-ui": "^1.4.3", "react-markdown": "^10.1.0", "remark-gfm": "^4.0.1", "tailwind-merge": "^3.5.0" }, "peerDependencies": { "@ai-sdk/react": ">=3.0.0", "ai": ">=6.0.0", "exceljs": ">=4.0.0", "lucide-react": ">=0.400.0", "react": ">=18.0.0", "react-dom": ">=18.0.0", "react-syntax-highlighter": ">=15.0.0", "recharts": ">=2.0.0", "tailwindcss": ">=4.0.0" }, "optionalPeers": ["exceljs", "lucide-react", "react-syntax-highlighter", "recharts", "tailwindcss"] }, "sha512-yjGCXSOtRjFinOeUD1K2nly7lKmCDC8FiFD1+ITQ82CHTi0/ElM+XH35tTGJjF/z8c0UL2tZwN8vAgTsIgxBtg=="],
 
     "@useatlas/types": ["@useatlas/types@0.0.8", "", {}, "sha512-u7/Lv/YcWJxlzPjSJH1ja5OELxu93Hd25b8hDmohHgSSB5/pPmAUJylgGeP4L2OHHPwYjHxFAQZ6GEgyK8nQhg=="],
 
