@@ -2,8 +2,9 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Conversation, ConversationWithMessages, Message, ShareStatus, ShareMode, ShareExpiryKey, NotebookStateWire, ForkBranchWire } from "../lib/types";
+import type { Conversation, ConversationWithMessages, ShareStatus, ShareMode, ShareExpiryKey, NotebookStateWire, ForkBranchWire } from "../lib/types";
 import type { UIMessage } from "@ai-sdk/react";
+import { transformMessages } from "@useatlas/types/conversation";
 import { createAtlasFetch } from "../lib/fetch-client";
 
 export interface UseConversationsOptions {
@@ -27,6 +28,8 @@ export interface UseConversationsReturn {
   saveNotebookState: (id: string, state: NotebookStateWire) => Promise<void>;
   forkConversation: (sourceId: string, forkPointMessageId: string, label?: string) => Promise<{ id: string; branches: ForkBranchWire[]; warning?: string }>;
   convertToNotebook: (sourceId: string) => Promise<{ id: string; messageCount: number }>;
+  deleteBranch: (rootId: string, branchId: string) => Promise<void>;
+  renameBranch: (rootId: string, branchId: string, label: string) => Promise<void>;
   deleteConversation: (id: string) => Promise<void>;
   starConversation: (id: string, starred: boolean) => Promise<void>;
   shareConversation: (id: string, opts?: { expiresIn?: ShareExpiryKey; shareMode?: ShareMode }) => Promise<{ token: string; url: string }>;
@@ -35,39 +38,7 @@ export interface UseConversationsReturn {
   refresh: () => Promise<void>;
 }
 
-export function transformMessages(messages: Message[]): UIMessage[] {
-  return messages
-    .filter((m) => m.role === "user" || m.role === "assistant")
-    .map((m) => {
-      const parts: UIMessage["parts"] = Array.isArray(m.content)
-        ? (m.content as Record<string, unknown>[])
-            .filter((p) => p.type === "text" || p.type === "tool-invocation")
-            .map((p, idx) => {
-              if (p.type === "tool-invocation") {
-                const toolCallId = typeof p.toolCallId === "string" && p.toolCallId
-                  ? p.toolCallId
-                  : `unknown-${idx}`;
-                return {
-                  type: "dynamic-tool" as const,
-                  toolName: typeof p.toolName === "string" ? p.toolName : "unknown",
-                  toolCallId,
-                  toolInvocationId: toolCallId,
-                  state: "output-available" as const,
-                  input: p.args,
-                  output: p.result,
-                };
-              }
-              return { type: "text" as const, text: String(p.text ?? "") };
-            })
-        : [{ type: "text" as const, text: String(m.content) }];
-
-      return {
-        id: m.id,
-        role: m.role as "user" | "assistant",
-        parts,
-      };
-    });
-}
+export { transformMessages } from "@useatlas/types/conversation";
 
 interface ConversationListData {
   conversations: Conversation[];
@@ -231,6 +202,21 @@ export function useConversations(opts: UseConversationsOptions): UseConversation
     };
   }, [api]);
 
+  const deleteBranch = useCallback(async (
+    rootId: string,
+    branchId: string,
+  ): Promise<void> => {
+    await api.del(`/api/v1/conversations/${rootId}/branches/${branchId}`);
+  }, [api]);
+
+  const renameBranch = useCallback(async (
+    rootId: string,
+    branchId: string,
+    label: string,
+  ): Promise<void> => {
+    await api.patch(`/api/v1/conversations/${rootId}/branches/${branchId}`, { label });
+  }, [api]);
+
   const convertToNotebook = useCallback(async (
     sourceId: string,
   ): Promise<{ id: string; messageCount: number }> => {
@@ -262,6 +248,8 @@ export function useConversations(opts: UseConversationsOptions): UseConversation
     saveNotebookState,
     forkConversation,
     convertToNotebook,
+    deleteBranch,
+    renameBranch,
     deleteConversation,
     starConversation,
     shareConversation,
