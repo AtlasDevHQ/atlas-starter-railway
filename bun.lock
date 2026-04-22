@@ -29,7 +29,7 @@
         "@tanstack/react-table": "^8.21.3",
         "@useatlas/react": "^0.0.7",
         "@useatlas/sdk": "^0.0.11",
-        "@useatlas/types": "^0.0.14",
+        "@useatlas/types": "^0.0.15",
         "ai": "^6.0.141",
         "better-auth": "^1.5.1",
         "class-variance-authority": "^0.7.1",
@@ -720,7 +720,7 @@
 
     "@useatlas/sdk": ["@useatlas/sdk@0.0.11", "", { "dependencies": { "@useatlas/types": "^0.0.11" } }, "sha512-b85jgJU4mxfkV/QTFOiOso8rjEeZl2Y4sjrAH7RdIky4gXhGm5AXfGezxqxKZRTaKy4uSPmoay3yCHgSbHXmPw=="],
 
-    "@useatlas/types": ["@useatlas/types@0.0.14", "", {}, "sha512-FHojA4aeljyqJc1hYYVGMPlRpz61vg3/e5qrtlm+bDqoDGLPsGVerLZvahCR0+Au81iq1xmExqohxei6OscHrA=="],
+    "@useatlas/types": ["@useatlas/types@0.0.15", "", {}, "sha512-golL7ZJAfSF5lBRFZKh+o2b8WzUWyDjdXVTPrBzS+kUcNg1W4Wa/SfUcpBdlI/e6aDUQn2IToODy+PizFDDTGQ=="],
 
     "@vercel/oidc": ["@vercel/oidc@3.2.0", "", {}, "sha512-UycprH3T6n3jH0k44NHMa7pnFHGu/N05MjojYr+Mc6I7obkoLIJujSWwin1pCvdy/eOxrI/l3uDLQsmcrOb4ug=="],
 
@@ -980,7 +980,7 @@
 
     "effect": ["effect@3.21.1", "", { "dependencies": { "@standard-schema/spec": "^1.0.0", "fast-check": "^3.23.1" } }, "sha512-bA3TsBd0mByThuCnE6FQqS+L3DLazk4UbE9jp0CqVfIjQl5DKi8sAe93O/ZKeF7clL65fJxcsVGiAKYXdnHByA=="],
 
-    "electron-to-chromium": ["electron-to-chromium@1.5.342", "", {}, "sha512-GTuy59SdGxYgz+HN8KwOjFAVF2gfoKEmv0PFholcvVtbI9GPDND0m6ynGX3gAKOavcHRLrcfNy0QMbHbAemYdw=="],
+    "electron-to-chromium": ["electron-to-chromium@1.5.343", "", {}, "sha512-YHnQ3MXI08icvL9ZKnEBy05F2EQ8ob01UaMOuMbM8l+4UcAq6MPPbBTJBbsBUg3H8JeZNt+O4fjsoWth3p6IFg=="],
 
     "emoji-regex": ["emoji-regex@10.6.0", "", {}, "sha512-toUI84YS5YmxW219erniWD0CIVOo46xGKColeNQRgOzDorgBi1v4D71/OFzgD9GO2UGKIv1C3Sp8DAn0+j5w7A=="],
 
