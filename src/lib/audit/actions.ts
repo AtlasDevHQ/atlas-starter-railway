@@ -50,6 +50,14 @@ export const ADMIN_ACTIONS = {
     ban: "user.ban",
     unban: "user.unban",
     removeFromWorkspace: "user.remove_from_workspace",
+    /**
+     * Bulk revocation (`session_revoke_all`) is emitted by two admin
+     * surfaces — the dedicated session route and the users route — so
+     * downstream queries filtering on `action_type` see one event shape
+     * per admin intent, not two.
+     */
+    sessionRevoke: "user.session_revoke",
+    sessionRevokeAll: "user.session_revoke_all",
   },
   sso: {
     configure: "sso.configure",
@@ -108,6 +116,19 @@ export const ADMIN_ACTIONS = {
     connectionDelete: "scim.connection_delete",
     groupMappingCreate: "scim.group_mapping_create",
     groupMappingDelete: "scim.group_mapping_delete",
+  },
+  /**
+   * EE custom RBAC mutations. Without these entries the Better-Auth
+   * `user.change_role` trail covers platform-role changes but a workspace
+   * admin can define a role with `admin:audit` / `connection:delete`, assign
+   * it to any org member, and leave no forensic trace. See F-25 in
+   * .claude/research/security-audit-1-2-3.md.
+   */
+  role: {
+    create: "role.create",
+    update: "role.update",
+    delete: "role.delete",
+    assign: "role.assign",
   },
   /**
    * Without these entries a compromised admin could shrink retentionDays
