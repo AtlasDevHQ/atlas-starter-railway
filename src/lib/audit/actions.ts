@@ -15,6 +15,16 @@ export const ADMIN_ACTIONS = {
     delete: "workspace.delete",
     purge: "workspace.purge",
     changePlan: "workspace.change_plan",
+    /**
+     * Manual reinstate from an abuse-prevention flag (throttled / suspended →
+     * none). Dual-written alongside the `abuse_events` row so compliance
+     * queries scanning `admin_action_log` for platform-admin actions don't
+     * miss reinstates — see F-33 in .claude/research/security-audit-1-2-3.md.
+     * Metadata carries `previousLevel` (warning / throttled / suspended) so
+     * reviewers can distinguish a low-impact un-warn from lifting a full
+     * suspension without joining on `abuse_events`.
+     */
+    reinstateAbuse: "workspace.reinstate_abuse",
   },
   /**
    * Custom domain lifecycle. `register` / `verify` / `delete` cover the
@@ -180,12 +190,29 @@ export const ADMIN_ACTIONS = {
   /**
    * Without these entries a compromised admin could shrink retentionDays
    * and hard-delete the audit trail leaving zero forensic record.
+   *
+   * `hardDelete` covers the scheduler-driven automatic hard-delete emitted
+   * by `hardDeleteExpired` at the library layer when `count > 0`. The
+   * manual-trigger HTTP route emits `manualHardDelete` — forensic queries
+   * can tell an admin-triggered erase from a retention-schedule erase by
+   * filtering on the action type alone.
    */
   audit_retention: {
     policyUpdate: "audit_retention.policy_update",
     export: "audit_retention.export",
     manualPurge: "audit_retention.manual_purge",
     manualHardDelete: "audit_retention.manual_hard_delete",
+    hardDelete: "audit_retention.hard_delete",
+  },
+  /**
+   * Audit-log self-audit domain (F-27). `purgeCycle` is emitted once per
+   * 24 h `runPurgeCycle` tick by the EE purge scheduler — even at zero
+   * rows. The absence of a cycle row over a retention window IS the signal
+   * that the scheduler stopped. Uses the reserved `system:audit-purge-scheduler`
+   * actor since the cycle has no HTTP-bound admin.
+   */
+  audit_log: {
+    purgeCycle: "audit_log.purge_cycle",
   },
   /**
    * BYOT email-provider mutations — workspace admin swaps the outbound
