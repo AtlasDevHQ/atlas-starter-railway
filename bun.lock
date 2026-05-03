@@ -29,7 +29,7 @@
         "@tanstack/react-table": "^8.21.3",
         "@useatlas/react": "^0.0.7",
         "@useatlas/sdk": "^0.0.12",
-        "@useatlas/types": "^0.0.16",
+        "@useatlas/types": "^0.0.17",
         "ai": "^6.0.141",
         "better-auth": "^1.5.1",
         "class-variance-authority": "^0.7.1",
@@ -718,7 +718,7 @@
 
     "@useatlas/sdk": ["@useatlas/sdk@0.0.12", "", { "dependencies": { "@useatlas/types": "^0.0.16" } }, "sha512-Iko2BVFGXYEzES/h3xQre4HP0xdaVd9p7Ere5STUnKlMK9D8+Xp92zka0kEKJJzCmI1qrf4AeRrIRTLS/f2GaQ=="],
 
-    "@useatlas/types": ["@useatlas/types@0.0.16", "", {}, "sha512-DZnNmIN+Y3+vEZJ/vPZpxYlOWYKgaEM1+LJ/OGR71Fa26+j6yNwUDeWbAofEjV3rOphnrvQFmEytC4BL9cdgrQ=="],
+    "@useatlas/types": ["@useatlas/types@0.0.17", "", {}, "sha512-VDZqrCGl7TZemzYf3Cy21CxxtFbJxefLUNUnHnw10QM0VJsh85k6eCviceI4DxZokUek+NRTTWEMi7vh6Ys8+Q=="],
 
     "@vercel/oidc": ["@vercel/oidc@3.2.0", "", {}, "sha512-UycprH3T6n3jH0k44NHMa7pnFHGu/N05MjojYr+Mc6I7obkoLIJujSWwin1pCvdy/eOxrI/l3uDLQsmcrOb4ug=="],
 
@@ -1296,7 +1296,7 @@
 
     "kleur": ["kleur@4.1.5", "", {}, "sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ=="],
 
-    "kysely": ["kysely@0.28.16", "", {}, "sha512-3i5pmOiZvMDj00qhrIVbH0AnioVTx22DMP7Vn5At4yJO46iy+FM8Y/g61ltenLVSo3fiO8h8Q3QOFgf/gQ72ww=="],
+    "kysely": ["kysely@0.28.17", "", {}, "sha512-nbD8lB9EB3wNdMhOCdx5Li8DxnLbvKByylRLcJ1h+4SkrowVeECAyZlyiKMThF7xFdRz0jSQ2MoJr+wXux2y0Q=="],
 
     "lazystream": ["lazystream@1.0.1", "", { "dependencies": { "readable-stream": "^2.0.5" } }, "sha512-b94GiNHQNy6JNTrt5w6zNyffMrNkXZb3KTkCZJb2V1xaEGCk093vkZ2jk3tpaeP33/OiXC+WvK9AxUebnf5nbw=="],
 
@@ -2175,6 +2175,8 @@
     "@typescript-eslint/typescript-estree/semver": ["semver@7.7.4", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA=="],
 
     "@useatlas/react/@useatlas/types": ["@useatlas/types@0.0.8", "", {}, "sha512-u7/Lv/YcWJxlzPjSJH1ja5OELxu93Hd25b8hDmohHgSSB5/pPmAUJylgGeP4L2OHHPwYjHxFAQZ6GEgyK8nQhg=="],
+
+    "@useatlas/sdk/@useatlas/types": ["@useatlas/types@0.0.16", "", {}, "sha512-DZnNmIN+Y3+vEZJ/vPZpxYlOWYKgaEM1+LJ/OGR71Fa26+j6yNwUDeWbAofEjV3rOphnrvQFmEytC4BL9cdgrQ=="],
 
     "@vercel/sandbox/zod": ["zod@3.24.4", "", {}, "sha512-OdqJE9UDRPwWsrHjLN2F8bPxvwJBK22EHLWtanu0LSYr5YqzsaaW3RMgmjwr8Rypg5k+meEJdSPXJZXE/yqOMg=="],
 
