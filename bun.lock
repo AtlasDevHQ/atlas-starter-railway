@@ -31,7 +31,7 @@
         "@tanstack/react-table": "^8.21.3",
         "@useatlas/react": "^0.0.7",
         "@useatlas/sdk": "^0.0.12",
-        "@useatlas/types": "^0.0.19",
+        "@useatlas/types": "^0.0.21",
         "ai": "^6.0.141",
         "better-auth": "^1.6.9",
         "class-variance-authority": "^0.7.1",
@@ -763,7 +763,7 @@
 
     "@useatlas/sdk": ["@useatlas/sdk@0.0.12", "", { "dependencies": { "@useatlas/types": "^0.0.16" } }, "sha512-Iko2BVFGXYEzES/h3xQre4HP0xdaVd9p7Ere5STUnKlMK9D8+Xp92zka0kEKJJzCmI1qrf4AeRrIRTLS/f2GaQ=="],
 
-    "@useatlas/types": ["@useatlas/types@0.0.19", "", {}, "sha512-co9v1qmC3ntMNRA6vUTTz3V6j2Y3umV/tBn5t58V/lvi8uSNkGM9tAhwXS4u3ZmClIEZ2AnegQeJmFsS+/YGEg=="],
+    "@useatlas/types": ["@useatlas/types@0.0.21", "", {}, "sha512-RWArn150XuFzKcWXi8O17AatW2pZVTYLzaKuP/CY79uzjN9vumbnKyiVhB18l1RS63qscldyoppoFYV1m/biWw=="],
 
     "@vercel/oidc": ["@vercel/oidc@3.2.0", "", {}, "sha512-UycprH3T6n3jH0k44NHMa7pnFHGu/N05MjojYr+Mc6I7obkoLIJujSWwin1pCvdy/eOxrI/l3uDLQsmcrOb4ug=="],
 
