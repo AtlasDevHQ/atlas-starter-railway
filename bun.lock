@@ -810,7 +810,7 @@
 
     "@useatlas/sdk": ["@useatlas/sdk@0.1.0", "", { "dependencies": { "@useatlas/types": "^0.1.0" } }, "sha512-Us+BK77dP2D2e20vVxv+H4pPYjwCePWQQby0vt+P49yKEmsZEEktJ4hd/xaeXs8yxAoOOG3HawIUt4Y4NYOKeg=="],
 
-    "@useatlas/types": ["@useatlas/types@0.1.6", "", {}, "sha512-BY6gtm56WJGdKkbyjpsr0Ec6mkT9aqez2ka5R8D5m3u9afU4XcgeupTJs6lTqZPnhPKAA/ZVaFiL35A/ayYPpA=="],
+    "@useatlas/types": ["@useatlas/types@0.1.7", "", {}, "sha512-B25zCioQxb3QlpoB00J6LxmPgU4j06D0pg30vihqiGSZzUQl68KusQQ61MTA8CrlDerXsYTHIWk1/T4/81w7xg=="],
 
     "@vercel/oidc": ["@vercel/oidc@3.2.0", "", {}, "sha512-UycprH3T6n3jH0k44NHMa7pnFHGu/N05MjojYr+Mc6I7obkoLIJujSWwin1pCvdy/eOxrI/l3uDLQsmcrOb4ug=="],
 
