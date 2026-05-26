@@ -32,7 +32,7 @@
         "@tanstack/react-table": "^8.21.3",
         "@useatlas/react": "^0.1.0",
         "@useatlas/sdk": "^0.1.0",
-        "@useatlas/twenty": "^0.0.2",
+        "@useatlas/twenty": "^0.0.3",
         "@useatlas/types": "^0.1.0",
         "ai": "^6.0.141",
         "better-auth": "^1.6.9",
@@ -817,7 +817,7 @@
 
     "@useatlas/sdk": ["@useatlas/sdk@0.1.0", "", { "dependencies": { "@useatlas/types": "^0.1.0" } }, "sha512-Us+BK77dP2D2e20vVxv+H4pPYjwCePWQQby0vt+P49yKEmsZEEktJ4hd/xaeXs8yxAoOOG3HawIUt4Y4NYOKeg=="],
 
-    "@useatlas/twenty": ["@useatlas/twenty@0.0.2", "", { "peerDependencies": { "@useatlas/plugin-sdk": ">=0.0.1", "ai": "^6.0.0", "effect": "^3.0.0", "zod": "^4.0.0" } }, "sha512-QJHfs1YcAq7KDZtZyK98FKOLg18Nau0RiO7hjTzZ3qlk60SKy4JEHQFXs+mg1T/fTSjBH4Bfbu0RN866Qe09ew=="],
+    "@useatlas/twenty": ["@useatlas/twenty@0.0.3", "", { "peerDependencies": { "@useatlas/plugin-sdk": ">=0.0.1", "ai": "^6.0.0", "effect": "^3.0.0", "zod": "^4.0.0" } }, "sha512-Q3dA9myaimO1oyH7CR2VTCvgVL1hqak8oKXAstgtbK0AzOpHm0BnX67QX8tqGONr+BjMfYihe7AeqXD2m54PcQ=="],
 
     "@useatlas/types": ["@useatlas/types@0.1.7", "", {}, "sha512-B25zCioQxb3QlpoB00J6LxmPgU4j06D0pg30vihqiGSZzUQl68KusQQ61MTA8CrlDerXsYTHIWk1/T4/81w7xg=="],
 
