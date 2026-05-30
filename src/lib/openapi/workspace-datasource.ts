@@ -35,8 +35,10 @@ import {
   narrowSupportedAuthKind,
   parseRateLimitPerMinute,
   parseRequestTimeoutMs,
+  parseSideEffectingOperations,
   parseWriteAllowlist,
 } from "./catalog";
+import { assertBaseUrlAllowed, EgressBlockedError, hostForLog } from "./egress-guard";
 import { buildResolvedAuth, snapshotToGraph } from "./probe";
 import type { OperationGraph, ResolvedAuth } from "./types";
 
@@ -178,17 +180,46 @@ function buildDatasource(
   // form's JSON string; an `atlas.config.ts` plugins entry may pass an array.
   // Both normalize to a Set; anything malformed fails closed to read-only.
   const writeAllowlist = parseWriteAllowlist(decrypted.write_allowlist, installId);
+  // #3008: operationIds the operator marks side-effecting (a mutating RPC-over-GET) —
+  // forced through the write allowlist + confirm path even though their method reads.
+  // A malformed list degrades to empty (classification stays method-only) — note
+  // this is NOT the "fails closed to read-only" posture above: an empty side-effecting
+  // list LEAVES an intended-to-gate GET running unconfirmed. See parseSideEffectingOperations.
+  const sideEffectingOperations = parseSideEffectingOperations(decrypted.side_effecting_operations, installId);
   const rateLimitPerMinute = parseRateLimitPerMinute(decrypted.rate_limit_per_minute, installId);
   const requestTimeoutMs = parseRequestTimeoutMs(decrypted.request_timeout_ms, installId);
+
+  // Resolve-side SSRF chokepoint (#3006): the operations base URL the agent
+  // sends requests to — an admin override OR the spec-derived `servers[0].url` — must
+  // pass the same guard install/rediscover apply. A public spec that declared an
+  // internal `servers[0].url` would otherwise produce a credentialed host-side
+  // request to internal infra. Fail-soft (skip + log), matching this resolver's
+  // posture: one misconfigured datasource must not sink the workspace's others.
+  // `guardedFetch` in the client is the hard execution-time backstop.
+  const baseUrl = resolveBaseUrl(openapiUrl, graph, baseUrlOverride);
+  try {
+    assertBaseUrlAllowed(baseUrl);
+  } catch (err) {
+    if (err instanceof EgressBlockedError) {
+      log.warn(
+        { installId, host: hostForLog(baseUrl) },
+        "OpenAPI install resolves to a blocked (private/internal) base URL — skipping " +
+          "(set ATLAS_OPENAPI_ALLOW_INTERNAL_HOSTS=true to allow internal targets, self-hosted only)",
+      );
+      return null;
+    }
+    throw err;
+  }
 
   return {
     id: installId,
     displayName,
     graph,
-    baseUrl: resolveBaseUrl(openapiUrl, graph, baseUrlOverride),
+    baseUrl,
     auth,
     representationMode: coerceRepresentationMode(decrypted.representation_mode),
     writeAllowlist,
+    sideEffectingOperations,
     ...(rateLimitPerMinute !== undefined ? { rateLimitPerMinute } : {}),
     ...(requestTimeoutMs !== undefined ? { requestTimeoutMs } : {}),
   };
