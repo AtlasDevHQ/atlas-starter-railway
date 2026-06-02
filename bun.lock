@@ -822,7 +822,7 @@
 
     "@useatlas/twenty": ["@useatlas/twenty@0.0.6", "", { "peerDependencies": { "@useatlas/plugin-sdk": ">=0.0.1", "ai": "^6.0.0", "effect": "^3.0.0", "zod": "^4.0.0" } }, "sha512-9u2ciCWaR4mw7N8DQVXHK1uEDtJKSMBeGMC0Y3pQNrbultW9YNZjrN6AHfdi93UzG6ssDRQt4++T7DMoqi2XEw=="],
 
-    "@useatlas/types": ["@useatlas/types@0.1.7", "", {}, "sha512-B25zCioQxb3QlpoB00J6LxmPgU4j06D0pg30vihqiGSZzUQl68KusQQ61MTA8CrlDerXsYTHIWk1/T4/81w7xg=="],
+    "@useatlas/types": ["@useatlas/types@0.1.11", "", {}, "sha512-l1lS9LB7SBeYA1olpDLDrDnh/beic6n5DkFwXVL8vj5FA1XKFqu8t/XUKiwNp9IKiFEfy3QauTh9qkDQT9zNpg=="],
 
     "@vercel/oidc": ["@vercel/oidc@3.2.0", "", {}, "sha512-UycprH3T6n3jH0k44NHMa7pnFHGu/N05MjojYr+Mc6I7obkoLIJujSWwin1pCvdy/eOxrI/l3uDLQsmcrOb4ug=="],
 
