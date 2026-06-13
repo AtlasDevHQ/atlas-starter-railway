@@ -33,7 +33,7 @@
         "@useatlas/react": "^0.1.0",
         "@useatlas/sdk": "^0.1.0",
         "@useatlas/twenty": "^0.0.6",
-        "@useatlas/types": "^0.1.0",
+        "@useatlas/types": "^0.2.0",
         "@useatlas/webhook-publisher": "^0.0.1",
         "ai": "^6.0.193",
         "better-auth": "^1.6.16",
@@ -800,7 +800,7 @@
 
     "@useatlas/twenty": ["@useatlas/twenty@0.0.6", "", { "peerDependencies": { "@useatlas/plugin-sdk": ">=0.0.1", "ai": "^6.0.0", "effect": "^3.0.0", "zod": "^4.0.0" } }, "sha512-9u2ciCWaR4mw7N8DQVXHK1uEDtJKSMBeGMC0Y3pQNrbultW9YNZjrN6AHfdi93UzG6ssDRQt4++T7DMoqi2XEw=="],
 
-    "@useatlas/types": ["@useatlas/types@0.1.19", "", {}, "sha512-ACCUyc17LK+gTwrWfNUMWkFOaVjqM0rfV+z/a/qghJ2PcP6F8NwBRjm96l4EMdweDxBmlU0ccXlXCoZ67YO91A=="],
+    "@useatlas/types": ["@useatlas/types@0.2.0", "", {}, "sha512-LkqWaT/Zar/LHPmiVZZ7tW+xl5bkBxy8wrQYeWMUYr2b5mEVuHornXdvJvZR1Br6XbFjEtuGx//Pn/XR94mfow=="],
 
     "@useatlas/webhook-publisher": ["@useatlas/webhook-publisher@0.0.1", "", {}, "sha512-hd6D0wLYbPcSPGd9LdcZShbJ3LZ1WBSMYDtpc8ls59Q2xTGtX27JXUAalGIGdqnnQSpDKiCnuzutbKTSnlXCkg=="],
 
@@ -2147,6 +2147,10 @@
     "@typescript-eslint/eslint-plugin/ignore": ["ignore@7.0.5", "", {}, "sha512-Hs59xBNfUIunMFgWAbGX5cq6893IbWg4KnrjbYwX3tx0ztorVgTDA6B2sxf8ejHJ4wz8BqGUMYlnzNBer5NvGg=="],
 
     "@typescript-eslint/typescript-estree/semver": ["semver@7.8.4", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-rUCObTnP32Q08R2uuIrt7r9PlEonuTmtuXYcW6s5kjdlj3xbnwe+21yXptAUYcMAABLkYYTtnmzb3w3EDZfueA=="],
+
+    "@useatlas/react/@useatlas/types": ["@useatlas/types@0.1.19", "", {}, "sha512-ACCUyc17LK+gTwrWfNUMWkFOaVjqM0rfV+z/a/qghJ2PcP6F8NwBRjm96l4EMdweDxBmlU0ccXlXCoZ67YO91A=="],
+
+    "@useatlas/sdk/@useatlas/types": ["@useatlas/types@0.1.19", "", {}, "sha512-ACCUyc17LK+gTwrWfNUMWkFOaVjqM0rfV+z/a/qghJ2PcP6F8NwBRjm96l4EMdweDxBmlU0ccXlXCoZ67YO91A=="],
 
     "ajv-formats/ajv": ["ajv@8.20.0", "", { "dependencies": { "fast-deep-equal": "^3.1.3", "fast-uri": "^3.0.1", "json-schema-traverse": "^1.0.0", "require-from-string": "^2.0.2" } }, "sha512-Thbli+OlOj+iMPYFBVBfJ3OmCAnaSyNn4M1vz9T6Gka5Jt9ba/HIR56joy65tY6kx/FCF5VXNB819Y7/GUrBGA=="],
 
