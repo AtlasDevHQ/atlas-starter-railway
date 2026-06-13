@@ -33,6 +33,7 @@ import {
 import { getCurrentPeriodUsage } from "@atlas/api/lib/metering";
 import { getPlanDefinition, getPlanLimits, getStripePlans, computeTokenBudget, isUnlimited, type PaidPlanTier } from "@atlas/api/lib/billing/plans";
 import { buildMetricStatus } from "@atlas/api/lib/billing/enforcement";
+import { getSeatCount } from "@atlas/api/lib/billing/seat-count";
 import { effectiveTrialEndsAt } from "@atlas/api/lib/billing/trial-expiry";
 import { getSettingLive } from "@atlas/api/lib/settings";
 import { resolveModelId } from "@atlas/api/lib/providers";
@@ -226,17 +227,18 @@ billing.openapi(getBillingStatusRoute, async (c) => {
 
     // Fetch seat count, connection count, subscription, and the saved model +
     // provider settings in parallel
-    const [seatCountResult, connectionCountResult, subResult, currentModelSetting, providerSetting] = yield* Effect.promise(() => Promise.all([
-      // Actual member count from Better Auth's member table
-      internalQuery<{ count: number }>(
-        `SELECT COUNT(*)::int AS count FROM member WHERE "organizationId" = $1`,
-        [orgId],
-      ).catch((err) => {
+    const [seatCount, connectionCountResult, subResult, currentModelSetting, providerSetting] = yield* Effect.promise(() => Promise.all([
+      // Seat count from the SHARED source (#3430) — the same `member` count
+      // enforcement and /admin/usage read, so the budget shown here matches the
+      // actual 429 threshold. getSeatCount serves the last-known value on a
+      // transient blip; only when nothing is known does it throw, and a read
+      // page degrades to 1 (logged) rather than failing the whole response.
+      getSeatCount(orgId).catch((err) => {
         log.warn(
           { err: err instanceof Error ? err.message : String(err), orgId },
-          "Failed to query member table for seat count — defaulting to 1",
+          "Failed to resolve seat count for billing page — defaulting to 1",
         );
-        return [{ count: 1 }] as Array<{ count: number }>;
+        return 1;
       }),
       // Connection count for this workspace. Exclude per-workspace
       // archive tombstones so a hidden demo install doesn't inflate the
@@ -253,13 +255,38 @@ billing.openapi(getBillingStatusRoute, async (c) => {
         );
         return [{ count: 0 }] as Array<{ count: number }>;
       }),
-      // Active subscription from Better Auth's subscription table
+      // Subscription from Better Auth's subscription table.
+      //
+      // #3429: do NOT filter to status IN ('active','trialing'). A
+      // past_due / unpaid / canceled subscription is exactly when the user
+      // must reach the billing portal to fix payment — filtering it out
+      // serialized `subscription: null` and the UI hid the portal. Return
+      // whatever row exists and let the web present the state.
+      //
+      // A workspace can carry more than one row (an old canceled sub plus a
+      // fresh active one after resubscribe). Prefer a live row over a dead
+      // one so a stale canceled record doesn't shadow the real subscription:
+      // order healthy statuses first, then most-recently-updated. We also
+      // surface cancelAtPeriodEnd / periodEnd so the UI can show a
+      // pending-cancel end-date notice.
       internalQuery<{
         stripeSubscriptionId: string;
         plan: string;
         status: string;
+        cancelAtPeriodEnd: boolean | null;
+        periodEnd: Date | string | null;
       }>(
-        `SELECT "stripeSubscriptionId", plan, status FROM subscription WHERE "referenceId" = $1 AND status IN ('active', 'trialing') LIMIT 1`,
+        `SELECT "stripeSubscriptionId", plan, status, "cancelAtPeriodEnd", "periodEnd"
+           FROM subscription
+          WHERE "referenceId" = $1
+          ORDER BY
+            CASE
+              WHEN status IN ('active', 'trialing') THEN 0
+              WHEN status IN ('past_due', 'unpaid', 'incomplete') THEN 1
+              ELSE 2
+            END,
+            "updatedAt" DESC NULLS LAST
+          LIMIT 1`,
         [orgId],
       ).catch((err) => {
         // Subscription table may not exist if Stripe plugin hasn't run migrations yet.
@@ -267,7 +294,13 @@ billing.openapi(getBillingStatusRoute, async (c) => {
           { err: err instanceof Error ? err.message : String(err), orgId },
           "Failed to query subscription table — may not exist yet",
         );
-        return [] as Array<{ stripeSubscriptionId: string; plan: string; status: string }>;
+        return [] as Array<{
+          stripeSubscriptionId: string;
+          plan: string;
+          status: string;
+          cancelAtPeriodEnd: boolean | null;
+          periodEnd: Date | string | null;
+        }>;
       }),
       // Current model setting (live read for accuracy)
       getSettingLive("ATLAS_MODEL", orgId).catch((err) => {
@@ -289,7 +322,6 @@ billing.openapi(getBillingStatusRoute, async (c) => {
       }),
     ]));
 
-    const seatCount = Math.max(1, seatCountResult[0]?.count ?? 1);
     const connectionCount = connectionCountResult[0]?.count ?? 0;
     const subscription = subResult.length > 0 ? subResult[0] : null;
     // SSOT (#3098): currentModel is exactly what the agent loop resolves for
@@ -366,6 +398,16 @@ billing.openapi(getBillingStatusRoute, async (c) => {
         stripeSubscriptionId: subscription.stripeSubscriptionId,
         plan: subscription.plan,
         status: subscription.status,
+        // Coerce to a plain boolean — pg returns true/false, but a legacy
+        // NULL column reads as a pending-cancel of "no".
+        cancelAtPeriodEnd: subscription.cancelAtPeriodEnd === true,
+        // pg hands back a Date for timestamptz; the metering reads use
+        // .toISOString() likewise. Normalize so the wire is always an ISO
+        // string (or null), never a serialized Date object.
+        periodEnd:
+          subscription.periodEnd instanceof Date
+            ? subscription.periodEnd.toISOString()
+            : subscription.periodEnd ?? null,
       } : null,
       availablePlans: buildAvailablePlans(),
     }, 200);
