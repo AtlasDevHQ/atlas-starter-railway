@@ -103,7 +103,7 @@
     "ai": "^6.0.208",
   },
   "packages": {
-    "@ai-sdk/amazon-bedrock": ["@ai-sdk/amazon-bedrock@4.0.127", "", { "dependencies": { "@ai-sdk/anthropic": "3.0.92", "@ai-sdk/openai": "3.0.80", "@ai-sdk/provider": "3.0.13", "@ai-sdk/provider-utils": "4.0.35", "@smithy/eventstream-codec": "^4.0.1", "@smithy/util-utf8": "^4.0.0", "aws4fetch": "^1.0.20" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-omuQt7avbj3+sWnuXW77yeXoYE6SWEhckgrtVV0GklFhiShHEPAVwGlK33jMcLq40ehSMopRR1ejhvpuVmRgpg=="],
+    "@ai-sdk/amazon-bedrock": ["@ai-sdk/amazon-bedrock@4.0.128", "", { "dependencies": { "@ai-sdk/anthropic": "3.0.92", "@ai-sdk/openai": "3.0.80", "@ai-sdk/provider": "3.0.13", "@ai-sdk/provider-utils": "4.0.35", "@smithy/eventstream-codec": "^4.0.1", "@smithy/util-utf8": "^4.0.0", "aws4fetch": "^1.0.20" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-T6mvUEYjTCkRAYByOwCwHT12J8r2U9fxJqfEf6k04OceGFjERCfmDdc2wmEaZ4VLo62KpUKJJf6gdf9Bcrx1gw=="],
 
     "@ai-sdk/anthropic": ["@ai-sdk/anthropic@3.0.92", "", { "dependencies": { "@ai-sdk/provider": "3.0.13", "@ai-sdk/provider-utils": "4.0.35" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-dFrf4xhx2yM686KHFm76Nn7nBekjkjiw1btqOyR26/kXz58QMguhNsjyvMqPktD8AW/wwTAq0fDRVyDvF2gH1w=="],
 
