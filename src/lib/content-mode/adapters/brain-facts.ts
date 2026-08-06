@@ -69,7 +69,7 @@ import { cardinalitySingleSql } from "@atlas/api/lib/brain/cardinality";
 // The tier vocabulary (#5033). Derived from `EPISODE_SOURCE_SPECS`'s declared
 // classes, so a future warehouse-class member inherits the guard below without
 // touching this file.
-import { NON_WAREHOUSE_SOURCES } from "@atlas/api/lib/brain/sources";
+import { episodeSourceArraySql, NON_WAREHOUSE_SOURCES } from "@atlas/api/lib/brain/sources";
 import {
   classifyFactForPromotion,
   isJsonObject,
@@ -362,14 +362,17 @@ export const WIDEN_AND_PROMOTE_FACTS_SQL = `
  * two ways. Nothing user-supplied reaches here: every element is a
  * compile-time key of `EPISODE_SOURCE_SPECS`.
  *
+ * ⚠️ The splice itself moved to `sources.ts` (`episodeSourceArraySql`) when
+ * #5034's direction rule became the second consumer of a source list. It is the
+ * same expression, byte for byte, relocated for the reason the paragraph above
+ * already gives: the rule that makes it safe belongs beside the values.
+ *
  * An EMPTY list (every member warehouse-class) yields `ARRAY[]::text[]` — valid
  * SQL, false for every row, so the guard degrades to "only a `source`-less row
  * may supersede". Fail-closed, and `brain/__tests__/sources.test.ts` asserts
  * non-emptiness so the degradation is a red test rather than a quiet narrowing.
  */
-const NON_WAREHOUSE_SOURCE_ARRAY_SQL = `ARRAY[${NON_WAREHOUSE_SOURCES.map(
-  (source) => `'${source}'`,
-).join(", ")}]::text[]`;
+const NON_WAREHOUSE_SOURCE_ARRAY_SQL = episodeSourceArraySql(NON_WAREHOUSE_SOURCES);
 
 /**
  * The TIER GUARD (#5033, ADR-0037 §4) — *identity is source-agnostic;
@@ -558,9 +561,13 @@ function supersedableTierSql(alias: string): string {
  *
  *   - Rows written between migration 0187 and #5020 — closed by 0188, which
  *     repeats 0187's re-runnable backfill in #5020's own deploy.
- *   - Rows a region import lands, until #5035 carries keys verbatim on the v3
- *     bundle (`admin-migrate.ts`'s 18-column INSERT names no key column). A
- *     backfill cannot own this one: it runs at boot, the import runs on demand.
+ *   - Rows a region import landed before #5035, when `admin-migrate.ts`'s INSERT
+ *     named no key column. A backfill cannot own this one — it runs at boot, an
+ *     import runs on demand — so #5035 fixed it at the writer: a v3 bundle
+ *     carries the keys verbatim, and a v1/v2 bundle's facts are keyed once at
+ *     import against this region's post-merge vocabulary. An imported row can
+ *     still key to a norm this vocabulary cannot produce, which is an
+ *     under-match rather than an absent key, and ADR-0037 §8's chosen direction.
  *   - A surface that norms away (`-`, `___`) — PERMANENT and legal, per
  *     `identityKey`'s ⚠️. No backfill repairs it; `reconcile.ts` warns at
  *     ingest, which is the only signal such a claim ever produces.

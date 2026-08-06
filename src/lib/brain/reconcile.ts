@@ -182,10 +182,13 @@
  *     re-runnable backfill in THIS deploy to close exactly that window — the
  *     correctness need arrives here, not at the constraint flip, because here is
  *     where the consumers start depending on the column.
- *   - Every row a region import lands is likewise unkeyed until #5035 carries
- *     keys verbatim on the v3 bundle, and 0188 cannot help: it runs at boot and
- *     an import runs whenever an admin triggers one. Those facts are inert in
- *     all three consumers in the meantime — fail-closed, and #5035's to fix.
+ *   - A region import used to land every row unkeyed, and 0188 could not help:
+ *     it runs at boot, an import runs whenever an admin triggers one. **Closed
+ *     by #5035** — a v3 bundle carries the keys verbatim and a v1/v2 bundle's
+ *     facts are keyed once at import. What survives is narrower: a carried key
+ *     can name a norm THIS region's vocabulary cannot produce, so it collides
+ *     with nothing until a human curates. Under-match, and the recoverable
+ *     direction ADR-0037 §8 chose deliberately.
  *   - Dedupe is still only as good as the producer's determinism, just at a
  *     coarser grain. Two passes that phrase one claim differently ("is" vs "is
  *     on") remain two claims — that pair is a vocabulary ENTRY, not a
@@ -616,6 +619,27 @@ export interface ReconcileReport {
   readonly corroborated: number;
   /** Created facts carrying `provenance.provisional` — a subset of `created`. */
   readonly provisional: number;
+  /**
+   * Created facts carrying a non-null `object_cmp` — a subset of `created`, and
+   * the ONE trigger condition for the alias-proposal producer (#5034).
+   *
+   * ⚠️ It is a gate, not a statistic, so read what it is a gate ON before
+   * changing how it is counted. `ALIAS_PROPOSAL_SQL` joins two rows on
+   * `object_cmp` non-null and equal, so its candidate set is a pure function of
+   * the rows that HAVE one. A run that created none cannot have changed that
+   * set: a corroborating candidate writes no row at all, and a created row with
+   * a NULL comparable joins nothing on either side. `extract.ts` therefore skips
+   * the corpus-wide self-join entirely when this is zero, which today is very
+   * nearly always — `object_cmp` is never backfilled and there is no entity
+   * store, so only a typed object (money, a number, a date) produces one.
+   *
+   * NOT the same number as `provisional`, and the two are easy to conflate
+   * because both concern the resolver. `provisional` counts rows whose comparable
+   * is missing BECAUSE THE BATCH FAILED; this counts rows that have one at all,
+   * however they got it. A workspace with no store has `provisional: 0` and
+   * `comparable: 0` for entirely different reasons.
+   */
+  readonly comparable: number;
   readonly blocked: Readonly<Record<ReconcileBlockReason, number>>;
   /** Per-candidate, in input order. */
   readonly outcomes: readonly ReconcileOutcome[];
@@ -771,18 +795,26 @@ export const CORROBORATION_LOOKUP_SQL = `SELECT id
  * JSON scalars, `null` included: a surface that norms away has no key, and a
  * sentinel would file every such claim under one slot.
  *
- * `object_cmp` (#5030) is derived here on the same terms and is the ONLY write
- * path that ever produces one — migration 0191 deliberately does not backfill,
- * so a row predating this statement keeps NULL forever and stays `unknown`.
- * That is why the column is on the guard's UPDATE-only list beside the keys: a
- * second writer re-deriving it changes what a claim is provably different from,
- * and difference is what stamps `valid_to`.
+ * `object_cmp` (#5030) is derived here on the same terms, and this is the only
+ * path that DERIVES one — migration 0191 deliberately does not backfill, so a
+ * row predating this statement keeps NULL forever and stays `unknown`. That is
+ * why the column is on the guard's UPDATE-only list beside the keys: a second
+ * writer re-deriving it changes what a claim is provably different from, and
+ * difference is what stamps `valid_to`.
  *
- * `subject_cmp` (#5032) joins it on identical terms — sole writer, migration
- * 0193, no backfill, UPDATE-gated — and for the INVERTED reason: re-deriving one
- * changes what a claim is provably NOT the same subject as, and that suppresses
- * corroboration. A second writer stamping subject ids onto the existing corpus
- * would silently split live beliefs apart.
+ * `subject_cmp` (#5032) joins it on identical terms — same sole DERIVER,
+ * migration 0193, no backfill, UPDATE-gated — and for the INVERTED reason:
+ * re-deriving one changes what a claim is provably NOT the same subject as, and
+ * that suppresses corroboration. A second writer stamping subject ids onto the
+ * existing corpus would silently split live beliefs apart.
+ *
+ * ⚠️ **Since #5035 there IS a second writer of both columns, and the wording
+ * above narrowed to say so.** The region importer INSERTs them
+ * (`admin-migrate.ts`), which is a row COPY rather than a derivation — ADR-0037
+ * §8's rule — and it carries only what `regionPortableComparable` judged
+ * portable, nulling every store-local id. So "sole writer" was false from that
+ * commit; "sole deriver" is what the argument above actually needs, and it still
+ * holds.
  *
  * `RETURNING id` and nothing else. A key must never reach a consumer that could
  * branch on it — that is what makes an alias un-removable — and
@@ -1002,6 +1034,7 @@ export async function reconcileFacts(
       created: 0,
       corroborated: 0,
       provisional: 0,
+      comparable: 0,
       blocked,
       outcomes: candidates.map(() => ({ kind: "blocked" as const, reason })),
     };
@@ -1031,7 +1064,7 @@ export async function reconcileFacts(
   const grantTokens = episode.visibleTo.filter((t): t is string => typeof t === "string");
 
   if (candidates.length === 0) {
-    return { created: 0, corroborated: 0, provisional: 0, blocked, outcomes: [] };
+    return { created: 0, corroborated: 0, provisional: 0, comparable: 0, blocked, outcomes: [] };
   }
 
   // ── Blank-trim pass (no database, no resolver) ────────────────────────
@@ -1286,14 +1319,40 @@ export async function reconcileFacts(
   let created = 0;
   let corroborated = 0;
   let provisional = 0;
-  for (const outcome of outcomes) {
+  let comparable = 0;
+  for (const [index, outcome] of outcomes.entries()) {
     // Exhaustive, with a `never` binding: a fourth outcome arm must be counted
     // somewhere, and the compiler is the only reviewer that never forgets.
     switch (outcome.kind) {
-      case "created":
+      case "created": {
         created++;
         if (outcome.provisional) provisional++;
+        // Read off `prepared`, which the transaction above maps 1:1 onto
+        // `outcomes` in input order — the outcome itself does not carry the
+        // comparable, and widening it to would put a value on the wire-ish shape
+        // that `ReconcileReport.comparable`'s docstring says is a GATE. The
+        // index lookup is what keeps the two definitions of "this row got a
+        // comparable value" from becoming two.
+        //
+        // ⚠️ THROWS on a desync rather than under-counting, which is the same
+        // choice the `never` arm below makes and for a sharper reason. This
+        // number is not a statistic: it is the sole trigger for #5034's alias
+        // producer, so a silent under-count does not skew a metric, it RETIRES
+        // the producer repo-wide with no log line, no red test and no symptom —
+        // the one failure the mutation table calls out as invisible to
+        // everything else. The invariant is the one the compiler cannot check,
+        // so it is the one that needs the runtime assertion.
+        const item = prepared[index];
+        if (item === undefined || item.kind !== "prepared") {
+          throw new Error(
+            `brain reconcile: outcomes/prepared fell out of 1:1 at index ${index} — a "created" ` +
+              "outcome has no prepared candidate behind it. Refusing rather than under-counting " +
+              "`comparable`, which would silently switch off the alias-proposal producer (#5034).",
+          );
+        }
+        if (item.comparableAtRest !== null) comparable++;
         break;
+      }
       case "corroborated":
         corroborated++;
         break;
@@ -1306,7 +1365,7 @@ export async function reconcileFacts(
     }
   }
 
-  return { created, corroborated, provisional, blocked, outcomes };
+  return { created, corroborated, provisional, comparable, blocked, outcomes };
 }
 
 // ---------------------------------------------------------------------------
