@@ -35,7 +35,7 @@
         "@useatlas/react": "^0.3.0",
         "@useatlas/sdk": "^0.1.0",
         "@useatlas/twenty": "^0.0.6",
-        "@useatlas/types": "^0.7.0",
+        "@useatlas/types": "^0.11.0",
         "@useatlas/webhook-publisher": "^0.0.1",
         "ai": "^6.0.235",
         "better-auth": "^1.7.1",
@@ -781,7 +781,7 @@
 
     "@useatlas/twenty": ["@useatlas/twenty@0.0.6", "", { "peerDependencies": { "@useatlas/plugin-sdk": ">=0.0.1", "ai": "^6.0.0", "effect": "^3.0.0", "zod": "^4.0.0" } }, "sha512-9u2ciCWaR4mw7N8DQVXHK1uEDtJKSMBeGMC0Y3pQNrbultW9YNZjrN6AHfdi93UzG6ssDRQt4++T7DMoqi2XEw=="],
 
-    "@useatlas/types": ["@useatlas/types@0.7.0", "", {}, "sha512-VyfYPUoTbJLrUxQ6hI5fACmY1Bkceg3SF/8vR9eTCXE4lWSKNE4fUi4G8ZDS8IbpTBZ+dGHvNMv2E2OCVcx0IA=="],
+    "@useatlas/types": ["@useatlas/types@0.11.0", "", {}, "sha512-DcVzpkyQFeFtpLcxDvaPmPpg/44OxzdYRjk3GDcxFLQs6xYlkqj4JHM5/fZnJgF7+3PR3iMXs53hYRnwCHMtEA=="],
 
     "@useatlas/webhook-publisher": ["@useatlas/webhook-publisher@0.0.1", "", {}, "sha512-hd6D0wLYbPcSPGd9LdcZShbJ3LZ1WBSMYDtpc8ls59Q2xTGtX27JXUAalGIGdqnnQSpDKiCnuzutbKTSnlXCkg=="],
 
