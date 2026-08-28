@@ -1043,7 +1043,7 @@
 
     "effect": ["effect@3.22.1", "", { "dependencies": { "@standard-schema/spec": "^1.0.0", "fast-check": "^3.23.1" } }, "sha512-TNoXushmPOBAjJlthF5d2QwnX2xBPEtcNJr5XKNKbRLbDvBcOYkXlYDfvGfSA0zriwLFuCll5MDtNMAdZL17PQ=="],
 
-    "electron-to-chromium": ["electron-to-chromium@1.5.415", "", {}, "sha512-958V+Kbhtgz+SxXeEVKBjrlKRBIDAYvUJfwhjxMZ5S6ut9jAl7l9ZKBkBrvjyjZE36PabLUo2L8kEeV5O4vgJg=="],
+    "electron-to-chromium": ["electron-to-chromium@1.5.416", "", {}, "sha512-K6bvB2BjnNrugtIih6ewlbBI9DXa976jIdiIlRLHhBoEI9a4JaQjjHyF+A1IQI543aQYR4LnmOrT/K5fZj0aPA=="],
 
     "email-reply-parser": ["email-reply-parser@2.3.9", "", { "peerDependencies": { "re2": "1.x" }, "optionalPeers": ["re2"] }, "sha512-k5w4cjqLSZABTyxkFHQLnMKJgrK2l6mPptmOnQHlwIosw86S05Xnupy4PPdw8XdXv/kXzn2PAnLfFMNFVUH4YQ=="],
 
